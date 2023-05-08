@@ -1,3 +1,17 @@
-import * as seba_rust from "seba-rust";
+import { BoilingSession } from "seba-rust";
 
-seba_rust.greet();
+let boiling_session = BoilingSession.new();
+
+[
+    "#mass-input",
+    "#boiling-temperature-input",
+    "#start-temperature-input",
+].forEach(selector => {
+    document.querySelector(selector).addEventListener("input", () => boiling_session.update_display());
+});
+
+setInterval(() => {
+    boiling_session.update_display();
+}, 100);
+
+// init();
