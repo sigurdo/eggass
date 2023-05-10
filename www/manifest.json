@@ -1,0 +1,20 @@
+
+{
+    "name": "seba2",
+    "short_name": "seba2",
+    "description": "Scientific Egg Boiling Assistant 2",
+    "start_url": "/seba2/www/dist/",
+    "display": "standalone",
+    "scope": "/",
+    "background_color": "#ffffff",
+    "theme_color": "#ffff00",
+    "status_bar": "default",
+    "icons": [{
+        "src": "/seba2/www/dist/icon/icon.png",
+        "type": "image/png",
+        "sizes": "256x256"
+    }],
+    "dir": "/www/dist",
+    "lang": "nb-no"
+}
+  
