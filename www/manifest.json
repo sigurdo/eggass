@@ -7,7 +7,7 @@
     "display": "standalone",
     "scope": "/",
     "background_color": "#ffffff",
-    "theme_color": "#ffff00",
+    "theme_color": "#d08200",
     "status_bar": "default",
     "icons": [{
         "src": "/seba2/www/dist/icon.png",
