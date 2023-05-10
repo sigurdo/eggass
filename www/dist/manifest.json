@@ -10,11 +10,11 @@
     "theme_color": "#ffff00",
     "status_bar": "default",
     "icons": [{
-        "src": "/seba2/www/dist/icon/icon.png",
+        "src": "/seba2/www/dist/icon.png",
         "type": "image/png",
         "sizes": "256x256"
     }],
-    "dir": "/www/dist",
+    "dir": "/seba2/www/dist",
     "lang": "nb-no"
 }
   

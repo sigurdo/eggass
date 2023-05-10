@@ -11,11 +11,11 @@ module.exports = {
   plugins: [
     new CopyWebpackPlugin([
       'index.html',
-      'serviceworker/register_serviceworker.js',
-      'serviceworker/serviceworker.js',
+      'register_serviceworker.js',
+      'serviceworker.js',
       'manifest.json',
-      'icon/icon.ico',
-      'icon/icon.png',
+      'icon.ico',
+      'icon.png',
     ])
   ],
 };
