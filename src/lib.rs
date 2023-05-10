@@ -229,6 +229,11 @@ pub fn set_start_temperature_display(temperature: f64) {
         .set_inner_html(format!("{:.1} °C", temperature).as_str());
 }
 
+pub fn set_time_since_start_display(time: f64) {
+    query_selector("#time-since-start-display")
+        .set_inner_html(format!("{:.0} min {:.0} s", time as i32 / 60, time as i32 % 60).as_str());
+}
+
 pub fn set_yolk_temperature_display(temperature: f64) {
     query_selector("#yolk-temperature-display")
         .set_inner_html(format!("{:.1} °C", temperature).as_str());
@@ -243,6 +248,7 @@ pub fn update_outputs() {
     let parameters = *boiling_session_parameters_mutex.lock().unwrap();
     if let Some(boiling_start) = *boiling_start_mutex.lock().unwrap() {
         let time_ms = get_performance_object().now() - boiling_start;
+        set_time_since_start_display(0.001 * time_ms);
         set_yolk_temperature_display(get_yolk_temperature(0.001 * time_ms, &parameters));
     }
     set_boiling_time_x_degrees_display(70, get_boiling_time(70.0, &parameters));
