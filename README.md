@@ -2,6 +2,8 @@
 
 <!-- **Boil your egg with scientific precision.** -->
 
+[Go to app](www/dist/)
+
 seba2 is a web app that helps you boil your eggs with scientific precision, based on [the research by Charles D. H. Williams](https://newton.ex.ac.uk/teaching/CDHW/egg/) at the University of Exeter.
 
 The app is written in [Rust](https://www.rust-lang.org/) and compiled to webassembly with [wasm-pack](https://github.com/rustwasm/wasm-pack). The repository structure is based on [wasm-pack-template](https://github.com/rustwasm/wasm-pack-template).
