@@ -1,15 +1,9 @@
 mod utils;
 
-use std::array;
-use std::f64::INFINITY;
 use std::f64::consts::PI;
+use std::f64::INFINITY;
 use std::fmt::Debug;
-use std::time::{SystemTime, UNIX_EPOCH, Duration};
-use std::sync::Arc;
-
-// extern crate chrono;
-
-// use chrono::Local;
+use std::sync::{Mutex};
 
 use wasm_bindgen::prelude::*;
 
@@ -20,7 +14,9 @@ use wasm_bindgen::prelude::*;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 use utils::set_panic_hook;
-use web_sys::{Window, HtmlElement, HtmlInputElement};
+use web_sys::{
+    Document, Element, Event, HtmlInputElement, Performance, Window,
+};
 
 extern crate web_sys;
 
@@ -28,11 +24,12 @@ extern crate web_sys;
 extern "C" {
     fn alert(s: &str);
 
-    // #[wasm_bindgen(js_namespace = console)]
-    // fn log(s: &str);
+    fn setInterval(closure: &Closure<dyn FnMut()>, milliseconds: u32) -> f64;
+    fn cancelInterval(token: f64);
 
-    #[wasm_bindgen(js_namespace = document)]
-    fn querySelector(s: &str);
+    fn setTimeout(closure: &Closure<dyn FnMut()>, milliseconds: u32) -> f64;
+
+    fn addEventListener(listener_type: &str, closure: &Closure<dyn FnMut(web_sys::Event)>) -> f64;
 }
 
 // A macro to provide `println!(..)`-style syntax for `console.log` logging.
@@ -42,11 +39,7 @@ macro_rules! log {
     }
 }
 
-struct Input {
-    html_input_selector: String,
-    html_display_selector: String,
-}
-
+#[derive(Debug, Clone, Copy)]
 pub struct EggParameters {
     radius: f64,
     specific_heat_capacity_white: f64,
@@ -57,7 +50,7 @@ pub struct EggParameters {
 impl EggParameters {
     fn default() -> EggParameters {
         EggParameters {
-            radius: 1.0,
+            radius: 2.0,
             specific_heat_capacity_white: 3.7,
             density_white: 1.038,
             thermal_conductivity_white: 5.4e-3,
@@ -66,11 +59,13 @@ impl EggParameters {
 
     fn from_mass(mass: f64) -> EggParameters {
         let mut parameters = EggParameters::default();
-        parameters.radius = mass.powf(1.0 / 3.0) / ((4.0 * PI / 3.0).powf(1.0 / 3.0) * parameters.density_white);
+        parameters.radius =
+            mass.powf(1.0 / 3.0) / ((4.0 * PI / 3.0).powf(1.0 / 3.0) * parameters.density_white);
         parameters
     }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct BoilSessionParameters {
     temperature_water: f64,
     temperature_egg_start: f64,
@@ -85,11 +80,9 @@ pub fn get_egg_temperature_at_radius(
     let temperature_water = parameters.temperature_water;
     let temperature_egg_start = parameters.temperature_egg_start;
     let egg = &parameters.egg;
-    let tau_0 = egg.specific_heat_capacity_white
-        * egg.density_white
-        * egg.radius.powi(2)
+    let tau_0 = egg.specific_heat_capacity_white * egg.density_white * egg.radius.powi(2)
         / egg.thermal_conductivity_white;
-    return temperature_water
+    let temperature_from_formula = temperature_water
         + (temperature_egg_start - temperature_water)
             * (2.0 * egg.radius / (PI * radius))
             * (1..100)
@@ -99,12 +92,16 @@ pub fn get_egg_temperature_at_radius(
                         * f64::exp(-(f64::from(n.pow(2)) * PI.powi(2) * time) / tau_0)
                 })
                 .sum::<f64>();
+    if time <= 0.0 {
+        temperature_egg_start
+    } else if !(temperature_egg_start..temperature_water).contains(&temperature_from_formula) {
+        temperature_egg_start
+    } else {
+        temperature_from_formula
+    }
 }
 
-pub fn get_yolk_temperature(
-    time: f64,
-    parameters: &BoilSessionParameters,
-) -> f64 {
+pub fn get_yolk_temperature(time: f64, parameters: &BoilSessionParameters) -> f64 {
     get_egg_temperature_at_radius(0.69 * parameters.egg.radius, time, parameters)
 }
 
@@ -119,104 +116,218 @@ pub fn get_boiling_time(
     if requested_yolk_temperature > parameters.temperature_water {
         return INFINITY;
     }
-    loop {
-        let temperature_difference = requested_yolk_temperature - get_yolk_temperature(guessed_time, parameters);
+    for _ in 1..100 {
+        let temperature_difference =
+            requested_yolk_temperature - get_yolk_temperature(guessed_time, parameters);
         if temperature_difference.abs() < 0.1 {
             return guessed_time;
         }
-        guessed_time += temperature_difference * f64::from(30 * 60 / 100);
+        guessed_time += temperature_difference * 5.0 * 60.0 / 70.0;
     }
+
+    // TODO: Panick if debug mode
+
+    return guessed_time;
 }
 
-pub fn read_html_input_as_number(body: &HtmlElement, selector: &str) -> f64 {
-    let input = body.query_selector(selector).unwrap().unwrap().dyn_into::<HtmlInputElement>().unwrap();
-    input.value_as_number()
+pub fn get_document() -> Document {
+    web_sys::window()
+        .expect("No window")
+        .document()
+        .expect("No document")
 }
 
-pub fn set_inner_html(body: &HtmlElement, selector: &str, value: &str) {
-    let element = body.query_selector(selector).unwrap().unwrap();
-    element.set_inner_html(value)
+pub fn query_selector(selector: &str) -> Element {
+    get_document()
+        .query_selector(selector)
+        .expect(format!("Error when querying {selector}").as_str())
+        .expect(format!("No element found matching query: {selector}").as_str())
 }
 
-#[wasm_bindgen]
-pub struct BoilingSession {
-    boiling_start: f64,
+pub fn get_window() -> Window {
+    web_sys::window().expect("No window")
 }
 
-#[wasm_bindgen]
-impl BoilingSession {
-    pub fn new() -> BoilingSession {
-        let window: Window = web_sys::window().expect("No window");
-        let document = window.document().expect("No document");
-        let body = document.body().expect("No body");
-        let performance_object = window.performance().expect("No performance object");
-        BoilingSession {
-            boiling_start: performance_object.now(),
+pub fn get_performance_object() -> Performance {
+    get_window().performance().expect("No performance object")
+}
+
+trait ElementTraitCustom {
+    fn add_event_listener(&self, type_: &str, callback: Closure<dyn Fn(Event)>);
+    fn get_value(&self) -> f64;
+    fn add_class(&self, class: &str);
+    fn remove_class(&self, class: &str);
+}
+
+impl ElementTraitCustom for Element {
+    fn add_event_listener(&self, type_: &str, callback: Closure<dyn Fn(Event)>) {
+        self.add_event_listener_with_callback(type_, &callback.as_ref().unchecked_ref())
+            .expect("Adding event listener failed");
+        callback.forget();
+    }
+
+    fn get_value(&self) -> f64 {
+        self.to_owned()
+            .dyn_into::<HtmlInputElement>()
+            .expect("Couldn't cast Element to HtmlInputElement")
+            .value_as_number()
+    }
+
+    fn add_class(&self, class: &str) {
+        self.set_class_name(format!("{} {}", self.class_name().as_str(), class).as_str());
+    }
+
+    fn remove_class(&self, class_to_remove: &str) {
+        let old_class_name = self.class_name();
+        let mut new_class_name = String::new();
+        for class in old_class_name.split(" ").filter(|&class| class != class_to_remove) {
+            new_class_name.push_str(format!(" {class}").as_str());
         }
-
-        // let input_callback = Closure::<dyn FnMut()>::new(move || session.update_display());
-        // body.query_selector("#mass-display").expect("No #thebutton").unwrap().add_event_listener_with_callback("input", &input_callback.as_ref().unchecked_ref());
-        
-        // input_callback.forget();
-        // session
-    }
-
-    pub fn update_display(&mut self) {
-        let window: Window = web_sys::window().expect("No window");
-        let document = window.document().expect("No document");
-        let body = document.body().expect("No body");
-        let performance_object = window.performance().expect("No performance object");
-        let time_ms = performance_object.now() - self.boiling_start;
-        let egg_mass = read_html_input_as_number(&body, "#mass-input");
-        let parameters = BoilSessionParameters {
-            temperature_water: read_html_input_as_number(&body, "#boiling-temperature-input"),
-            temperature_egg_start: read_html_input_as_number(&body, "#start-temperature-input"),
-            egg: EggParameters::from_mass(egg_mass),
-        };
-        let yolk_temperature = get_yolk_temperature(0.001 * time_ms, &parameters);
-        // let yolk_temperature = get_yolk_temperature(300.0, &parameters);
-        // log!("Yolk temperature: {:?}", yolk_temperature);
-
-        let boiling_time_75_degrees = get_boiling_time(75.0, &parameters);
-        // chrono::Duration::from_std(Duration(boiling_time_75_degrees))
-        // Duration::from_secs(boiling_time_75_degrees).subsec_millis()
-
-        
-
-
-        set_inner_html(&body, "#mass-display", format!("{:.1} g", egg_mass).as_str());
-        set_inner_html(&body, "#boiling-temperature-display", format!("{:.1} °C", parameters.temperature_water).as_str());
-        set_inner_html(&body, "#start-temperature-display", format!("{:.1} °C", parameters.temperature_egg_start).as_str());
-        set_inner_html(&body, "#yolk-temperature-display", format!("{:.1} °C", yolk_temperature).as_str());
-        set_inner_html(&body, "#boiling-time-75-degrees-display", format!("{:.0} min {:.0} s", boiling_time_75_degrees as i32 / 60, boiling_time_75_degrees as i32 % 60 ).as_str());
+        self.set_class_name(&new_class_name);
     }
 }
 
+trait EventTraitCustom {
+    fn target_element(&self) -> Element;
+}
+
+impl EventTraitCustom for Event {
+    fn target_element(&self) -> Element {
+        self.target()
+            .expect("Event has no target")
+            .dyn_ref::<Element>()
+            .expect("Den sier dette")
+            .to_owned()
+    }
+}
+
+static boiling_start_mutex: Mutex<Option<f64>> = Mutex::new(None);
+
+static boiling_session_parameters_mutex: Mutex<BoilSessionParameters> =
+    Mutex::new(BoilSessionParameters {
+        temperature_water: 100.0,
+        temperature_egg_start: 4.0,
+        egg: EggParameters {
+            radius: 2.0,
+            specific_heat_capacity_white: 3.7,
+            density_white: 1.038,
+            thermal_conductivity_white: 5.4e-3,
+        },
+    });
+
+pub fn set_mass_display(mass: f64) {
+    query_selector("#mass-display").set_inner_html(format!("{:.1} g", mass).as_str());
+}
+
+pub fn set_boiling_temperature_display(temperature: f64) {
+    query_selector("#boiling-temperature-display")
+        .set_inner_html(format!("{:.1} °C", temperature).as_str());
+}
+
+pub fn set_start_temperature_display(temperature: f64) {
+    query_selector("#start-temperature-display")
+        .set_inner_html(format!("{:.1} °C", temperature).as_str());
+}
+
+pub fn set_yolk_temperature_display(temperature: f64) {
+    query_selector("#yolk-temperature-display")
+        .set_inner_html(format!("{:.1} °C", temperature).as_str());
+}
+
+pub fn set_boiling_time_x_degrees_display(x: i32, time: f64) {
+    query_selector(format!("#boiling-time-{x}-degrees-display").as_str())
+        .set_inner_html(format!("{:.0} min {:.0} s", time as i32 / 60, time as i32 % 60).as_str());
+}
+
+pub fn update_outputs() {
+    let parameters = *boiling_session_parameters_mutex.lock().unwrap();
+    if let Some(boiling_start) = *boiling_start_mutex.lock().unwrap() {
+        let time_ms = get_performance_object().now() - boiling_start;
+        set_yolk_temperature_display(get_yolk_temperature(0.001 * time_ms, &parameters));
+    }
+    set_boiling_time_x_degrees_display(70, get_boiling_time(70.0, &parameters));
+    set_boiling_time_x_degrees_display(75, get_boiling_time(75.0, &parameters));
+    set_boiling_time_x_degrees_display(80, get_boiling_time(80.0, &parameters));
+    set_boiling_time_x_degrees_display(85, get_boiling_time(85.0, &parameters));
+}
 
 #[wasm_bindgen]
 pub fn init() {
-    // alert("Hello, seba2!");
+    set_panic_hook();
 
-    let inputs = vec![
-        Input {
-            html_input_selector: "#mass-input".to_string(),
-            html_display_selector: "#mass-display".to_string(),
-        },
-        Input {
-            html_input_selector: "#boiling-temperature-input".to_string(),
-            html_display_selector: "#boiling-temperature-display".to_string(),
-        },
-        Input {
-            html_input_selector: "#start-temperature-input".to_string(),
-            html_display_selector: "#start-temperature-display".to_string(),
-        },
-    ];
-        
-    log!("Hei");
-    
-    let window: Window = web_sys::window().expect("No window");
-    // let performance_object = window.performance().expect("No performance");
+    let mass = query_selector("#mass-input").get_value();
+    (*boiling_session_parameters_mutex.lock().unwrap()).egg = EggParameters::from_mass(mass);
+    set_mass_display(mass);
+    query_selector("#mass-input").add_event_listener(
+        "input",
+        Closure::<dyn Fn(_)>::new(|event: Event| {
+            let mass = event.target_element().get_value();
+            (*boiling_session_parameters_mutex.lock().unwrap()).egg =
+                EggParameters::from_mass(mass);
+            set_mass_display(mass);
+            update_outputs();
+        }),
+    );
 
-    // pub fn input_changed() {}
-    // window.set_interval_with_callback_and_timeout_and_arguments_0(&timer_callback_object, 1000);
+    let boiling_temperature = query_selector("#boiling-temperature-input").get_value();
+    (*boiling_session_parameters_mutex.lock().unwrap()).temperature_water = boiling_temperature;
+    set_boiling_temperature_display(boiling_temperature);
+    query_selector("#boiling-temperature-input").add_event_listener(
+        "input",
+        Closure::<dyn Fn(_)>::new(|event: Event| {
+            let boiling_temperature = event.target_element().get_value();
+            (*boiling_session_parameters_mutex.lock().unwrap()).temperature_water =
+                boiling_temperature;
+            set_boiling_temperature_display(boiling_temperature);
+            update_outputs();
+        }),
+    );
+
+    let start_temperature = query_selector("#start-temperature-input").get_value();
+    (*boiling_session_parameters_mutex.lock().unwrap()).temperature_egg_start =
+        start_temperature;
+    set_start_temperature_display(start_temperature);
+    query_selector("#start-temperature-input").add_event_listener(
+        "input",
+        Closure::<dyn Fn(_)>::new(|event: Event| {
+            let start_temperature = event.target_element().get_value();
+            (*boiling_session_parameters_mutex.lock().unwrap()).temperature_egg_start =
+                start_temperature;
+            set_start_temperature_display(start_temperature);
+            update_outputs();
+        }),
+    );
+
+    query_selector("#start-button").add_event_listener(
+        "click",
+        Closure::<dyn Fn(_)>::new(|event: Event| {
+            {
+                let mut boiling_start = boiling_start_mutex.lock().unwrap();
+                let yolk_temperature_display_wrapper = query_selector("#yolk-temperature-display-wrapper");
+                if (*boiling_start).is_none() {
+                    *boiling_start = Some(get_performance_object().now());
+                    let button = event.target_element();
+                    button.set_inner_html("Stopp");
+                    button.remove_class("btn-success");
+                    button.add_class("btn-danger");
+                    yolk_temperature_display_wrapper.remove_class("d-none");
+                } else {
+                    *boiling_start = None;
+                    let button = event.target_element();
+                    button.set_inner_html("Start");
+                    button.remove_class("btn-danger");
+                    button.add_class("btn-success");
+                    yolk_temperature_display_wrapper.add_class("d-none");
+                }
+            }
+            update_outputs();
+        }),
+    );
+
+    let boiling_interval_closure = Closure::<dyn FnMut()>::new(|| {
+        update_outputs();
+    });
+    setInterval(&boiling_interval_closure, 100);
+
+    boiling_interval_closure.forget();
 }
