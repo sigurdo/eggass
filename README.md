@@ -1,7 +1,5 @@
 # seba2 - Scientific Egg Boiling Assistant 2
 
-<!-- **Boil your egg with scientific precision.** -->
-
 [Go to app](https://sigurdo.github.io/seba2/www/dist/)
 
 seba2 is a web app that helps you boil your eggs with scientific precision, based on [the research by Charles D. H. Williams](https://newton.ex.ac.uk/teaching/CDHW/egg/) at the University of Exeter.
