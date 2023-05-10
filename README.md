@@ -1,63 +1,34 @@
-<div align="center">
+# seba2 - Scientific Egg Boiling Assistant 2
 
-  <h1><code>wasm-pack-template</code></h1>
+<!-- **Boil your egg with scientific precision.** -->
 
-  <strong>A template for kick starting a Rust and WebAssembly project using <a href="https://github.com/rustwasm/wasm-pack">wasm-pack</a>.</strong>
+seba2 is a web app that helps you boil your eggs with scientific precision, based on [the research by Charles D. H. Williams](https://newton.ex.ac.uk/teaching/CDHW/egg/) at the University of Exeter.
 
-  <p>
-    <a href="https://travis-ci.org/rustwasm/wasm-pack-template"><img src="https://img.shields.io/travis/rustwasm/wasm-pack-template.svg?style=flat-square" alt="Build Status" /></a>
-  </p>
+The app is written in [Rust](https://www.rust-lang.org/) and compiled to webassembly with [wasm-pack](https://github.com/rustwasm/wasm-pack). The repository structure is based on [wasm-pack-template](https://github.com/rustwasm/wasm-pack-template).
 
-  <h3>
-    <a href="https://rustwasm.github.io/docs/wasm-pack/tutorials/npm-browser-packages/index.html">Tutorial</a>
-    <span> | </span>
-    <a href="https://discordapp.com/channels/442252698964721669/443151097398296587">Chat</a>
-  </h3>
+## Build
 
-  <sub>Built with 🦀🕸 by <a href="https://rustwasm.github.io/">The Rust and WebAssembly Working Group</a></sub>
-</div>
-
-## About
-
-[**📚 Read this template tutorial! 📚**][template-docs]
-
-This template is designed for compiling Rust libraries into WebAssembly and
-publishing the resulting package to NPM.
-
-Be sure to check out [other `wasm-pack` tutorials online][tutorials] for other
-templates and usages of `wasm-pack`.
-
-[tutorials]: https://rustwasm.github.io/docs/wasm-pack/tutorials/index.html
-[template-docs]: https://rustwasm.github.io/docs/wasm-pack/tutorials/npm-browser-packages/index.html
-
-## 🚴 Usage
-
-### 🐑 Use `cargo generate` to Clone this Template
-
-[Learn more about `cargo generate` here.](https://github.com/ashleygwilliams/cargo-generate)
-
-```
-cargo generate --git https://github.com/rustwasm/wasm-pack-template.git --name my-project
-cd my-project
-```
-
-### 🛠️ Build with `wasm-pack build`
+Compile Rust code with
 
 ```
 wasm-pack build
 ```
 
-### 🔬 Test in Headless Browsers with `wasm-pack test`
+Build web app with
 
 ```
-wasm-pack test --headless --firefox
+cd www
+npm run build
 ```
 
-### 🎁 Publish to NPM with `wasm-pack publish`
+Debug web app with
 
 ```
-wasm-pack publish
+cd www
+npm run start
 ```
+
+and open [http://localhost:8080](http://localhost:8080) in your browser.
 
 ## 🔋 Batteries Included
 
@@ -71,12 +42,7 @@ wasm-pack publish
 
 ## License
 
-Licensed under either of
-
-* Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
-* MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
-
-at your option.
+Licensed under [WTFPL](LICENSE)
 
 ### Contribution
 
