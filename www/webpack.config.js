@@ -9,6 +9,13 @@ module.exports = {
   },
   mode: "development",
   plugins: [
-    new CopyWebpackPlugin(['index.html'])
+    new CopyWebpackPlugin([
+      'index.html',
+      'serviceworker/register_serviceworker.js',
+      'serviceworker/serviceworker.js',
+      'manifest.json',
+      'icon/icon.ico',
+      'icon/icon.png',
+    ])
   ],
 };
