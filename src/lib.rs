@@ -3,7 +3,10 @@ mod utils;
 use std::f64::consts::PI;
 use std::f64::INFINITY;
 use std::fmt::Debug;
-use std::sync::{Mutex};
+use std::sync::Mutex;
+
+use chrono::prelude::*;
+use chrono::{DateTime, Utc};
 
 use wasm_bindgen::prelude::*;
 
@@ -14,9 +17,7 @@ use wasm_bindgen::prelude::*;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 use utils::set_panic_hook;
-use web_sys::{
-    Document, Element, Event, HtmlInputElement, Performance, Window,
-};
+use web_sys::{Document, Element, Event, HtmlInputElement, Window};
 
 extern crate web_sys;
 
@@ -148,10 +149,6 @@ pub fn get_window() -> Window {
     web_sys::window().expect("No window")
 }
 
-pub fn get_performance_object() -> Performance {
-    get_window().performance().expect("No performance object")
-}
-
 trait ElementTraitCustom {
     fn add_event_listener(&self, type_: &str, callback: Closure<dyn Fn(Event)>);
     fn get_value(&self) -> f64;
@@ -180,7 +177,10 @@ impl ElementTraitCustom for Element {
     fn remove_class(&self, class_to_remove: &str) {
         let old_class_name = self.class_name();
         let mut new_class_name = String::new();
-        for class in old_class_name.split(" ").filter(|&class| class != class_to_remove) {
+        for class in old_class_name
+            .split(" ")
+            .filter(|&class| class != class_to_remove)
+        {
             new_class_name.push_str(format!(" {class}").as_str());
         }
         self.set_class_name(&new_class_name);
@@ -201,7 +201,7 @@ impl EventTraitCustom for Event {
     }
 }
 
-static boiling_start_mutex: Mutex<Option<f64>> = Mutex::new(None);
+static boiling_start_mutex: Mutex<Option<DateTime<Utc>>> = Mutex::new(None);
 
 static boiling_session_parameters_mutex: Mutex<BoilSessionParameters> =
     Mutex::new(BoilSessionParameters {
@@ -247,9 +247,12 @@ pub fn set_boiling_time_x_degrees_display(x: i32, time: f64) {
 pub fn update_outputs() {
     let parameters = *boiling_session_parameters_mutex.lock().unwrap();
     if let Some(boiling_start) = *boiling_start_mutex.lock().unwrap() {
-        let time_ms = get_performance_object().now() - boiling_start;
-        set_time_since_start_display(0.001 * time_ms);
-        set_yolk_temperature_display(get_yolk_temperature(0.001 * time_ms, &parameters));
+        let time = Utc::now()
+            .signed_duration_since(boiling_start)
+            .num_milliseconds() as f64
+            * 0.001;
+        set_time_since_start_display(time);
+        set_yolk_temperature_display(get_yolk_temperature(time, &parameters));
     }
     set_boiling_time_x_degrees_display(70, get_boiling_time(70.0, &parameters));
     set_boiling_time_x_degrees_display(75, get_boiling_time(75.0, &parameters));
@@ -290,8 +293,7 @@ pub fn init() {
     );
 
     let start_temperature = query_selector("#start-temperature-input").get_value();
-    (*boiling_session_parameters_mutex.lock().unwrap()).temperature_egg_start =
-        start_temperature;
+    (*boiling_session_parameters_mutex.lock().unwrap()).temperature_egg_start = start_temperature;
     set_start_temperature_display(start_temperature);
     query_selector("#start-temperature-input").add_event_listener(
         "input",
@@ -309,9 +311,10 @@ pub fn init() {
         Closure::<dyn Fn(_)>::new(|event: Event| {
             {
                 let mut boiling_start = boiling_start_mutex.lock().unwrap();
-                let yolk_temperature_display_wrapper = query_selector("#yolk-temperature-display-wrapper");
+                let yolk_temperature_display_wrapper =
+                    query_selector("#yolk-temperature-display-wrapper");
                 if (*boiling_start).is_none() {
-                    *boiling_start = Some(get_performance_object().now());
+                    *boiling_start = Some(Utc::now());
                     let button = event.target_element();
                     button.set_inner_html("Stopp");
                     button.remove_class("btn-success");

@@ -25,11 +25,14 @@ console_error_panic_hook = { version = "0.1.6", optional = true }
 wee_alloc = { version = "0.4.5", optional = true }
 
 js-sys = "0.3.61"
-# chrono = "0.4.24"
 
 [dependencies.web-sys]
 version = "0.3.61"
 features = [ "console", "Window", "HtmlDocument", "HtmlBodyElement", "HtmlInputElement", "HtmlTextAreaElement", "DateTimeValue", "Performance" ]
+
+[dependencies.chrono]
+version = "0.4.24"
+features = ["wasmbind"]
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"
