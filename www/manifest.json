@@ -6,7 +6,7 @@
     "start_url": "/seba2/www/dist/",
     "display": "standalone",
     "scope": "/",
-    "background_color": "#ffffff",
+    "background_color": "#212529",
     "theme_color": "#d08200",
     "status_bar": "default",
     "icons": [{
