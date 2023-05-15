@@ -10,13 +10,38 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [19.x]
+
+
     steps:
     - uses: actions/checkout@v3
 
-    - name: Build
+    # - name: Build
+    #   run: |
+    #     docker build -f .github/workflows/Dockerfile -t seba2-build .
+    #     docker run --volume $PWD:/code:rw seba2-build
+
+    - name: Install wasm-pack
       run: |
-        docker build -t seba2-build .
-        docker run --volume $PWD:/code:rw seba2-build
+        curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Compile Rust
+      run: |
+        wasm-pack build --release
+    
+    - name: Build website
+      run: |
+        cd www
+          npm install
+          npm run build
+        cd ..
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v1.0.8

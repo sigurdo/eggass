@@ -1,5 +1,0 @@
-services:
-  build:
-    build: .
-    volumes:
-      - ./:/code:rw

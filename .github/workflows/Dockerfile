@@ -6,7 +6,7 @@ RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | ash
 
 RUN apk -v --no-cache --update add nodejs npm
 
-COPY build.sh /build.sh
+COPY .github/workflows/build.sh /build.sh
 
 VOLUME [ "/code" ]
 

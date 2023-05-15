@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e
+cd /code
 
 wasm-pack build --release
 
