@@ -13,11 +13,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-  #   strategy:
-  #     matrix:
-  #       node-version: [19.x]
+    strategy:
+      matrix:
+        node-version: [19.x]
 
-  #   steps:
+    steps:
   #   - uses: actions/checkout@v3
 
   #   - name: Rust 'wasm-pack' Action
