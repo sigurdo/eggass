@@ -33,7 +33,7 @@ jobs:
       # image: Dockerfile
       run: |
         docker build -t seba2-build .
-        docker run -it --volume ./:/code:rw seba2-build
+        docker run --volume ./:/code:rw seba2-build
 
     # - name: Test
     #   run: |
