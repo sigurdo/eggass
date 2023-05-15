@@ -12,4 +12,4 @@ COPY . /code
 WORKDIR /code
 # CMD [ "wasm-pack", "build", "--release" ]
 # CMD [ "./build.sh" ]
-ENTRYPOINT [ "build.sh" ]
+ENTRYPOINT [ "/code/build.sh" ]
