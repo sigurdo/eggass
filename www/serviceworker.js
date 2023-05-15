@@ -1,11 +1,11 @@
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.0.0/workbox-sw.js');
 
 const urls_to_cache = [
-    "/seba2/www/dist/manifest.json",
-    "/seba2/www/dist/0.bootstrap.js",
-    "/seba2/www/dist/bootstrap.js",
-    "/seba2/www/dist/index.html",
-    new RegExp("/seba2/www/dist/.*\.wasm"),
+    "/manifest.json",
+    "/0.bootstrap.js",
+    "/bootstrap.js",
+    "/index.html",
+    new RegExp("/.*\.wasm"),
 ]
 
 for (let i = 0; i < urls_to_cache.length; i++) {
