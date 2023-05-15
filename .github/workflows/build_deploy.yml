@@ -28,15 +28,18 @@ jobs:
   #     with:
   #       node-version: ${{ matrix.node-version }}
 
-  #   - name: Build
-  #     run: |
-  #       cd www
-  #       npm install
-  #       npx webpack
-    - name: Test
-      run: |
-        pwd
-        ls
+    - name: Build
+      using: docker
+      image: Dockerfile
+      # run: |
+      #   cd www
+      #   npm install
+      #   npx webpack
+
+    # - name: Test
+    #   run: |
+    #     pwd
+    #     ls
     
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v1.0.8
