@@ -13,6 +13,9 @@
         "src": "/icon.png",
         "type": "image/png",
         "sizes": "256x256"
+    }, {
+        "src": "/icon.ico",
+        "sizes": "any"
     }],
     "dir": "/",
     "lang": "nb-no"
