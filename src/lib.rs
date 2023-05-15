@@ -215,18 +215,32 @@ static boiling_session_parameters_mutex: Mutex<BoilSessionParameters> =
         },
     });
 
+static end_temperature_mutex: Mutex<f64> = Mutex::new(75.0);
+
 pub fn set_mass_display(mass: f64) {
     query_selector("#mass-display").set_inner_html(format!("{:.1} g", mass).as_str());
 }
 
 pub fn set_boiling_temperature_display(temperature: f64) {
-    query_selector("#boiling-temperature-display")
-        .set_inner_html(format!("{:.1} °C", temperature).as_str());
+    // query_selector("#boiling-temperature-display")
+    //     .set_inner_html(format!("{:.1} °C", temperature).as_str());
 }
 
 pub fn set_start_temperature_display(temperature: f64) {
     query_selector("#start-temperature-display")
         .set_inner_html(format!("{:.1} °C", temperature).as_str());
+}
+
+pub fn set_end_temperature_display(temperature: f64) {
+    // query_selector("#end-temperature-display")
+    //     .set_inner_html(format!("{:.1} °C", temperature).as_str());
+    query_selector("#end-temperature-display-2")
+        .set_inner_html(format!("{:.1} °C", temperature).as_str());
+}
+
+pub fn set_end_temperature_boiling_time_display(time: f64) {
+    query_selector(format!("#end-temperature-boiling-time-display").as_str())
+        .set_inner_html(format!("{:.0} min {:.0} s", time as i32 / 60, time as i32 % 60).as_str());
 }
 
 pub fn set_time_since_start_display(time: f64) {
@@ -244,8 +258,14 @@ pub fn set_boiling_time_x_degrees_display(x: i32, time: f64) {
         .set_inner_html(format!("{:.0} min {:.0} s", time as i32 / 60, time as i32 % 60).as_str());
 }
 
+pub fn set_time_till_end_temperature_display(time: f64) {
+    query_selector(format!("#time-till-end-temperature-display").as_str())
+        .set_inner_html(format!("{:.0} min {:.0} s", time as i32 / 60, time as i32 % 60).as_str());
+}
+
 pub fn update_outputs() {
     let parameters = *boiling_session_parameters_mutex.lock().unwrap();
+    let end_temperature_boiling_time = get_boiling_time(*end_temperature_mutex.lock().unwrap(), &parameters);
     if let Some(boiling_start) = *boiling_start_mutex.lock().unwrap() {
         let time = Utc::now()
             .signed_duration_since(boiling_start)
@@ -253,11 +273,13 @@ pub fn update_outputs() {
             * 0.001;
         set_time_since_start_display(time);
         set_yolk_temperature_display(get_yolk_temperature(time, &parameters));
+        set_time_till_end_temperature_display(end_temperature_boiling_time - time);
     }
     set_boiling_time_x_degrees_display(70, get_boiling_time(70.0, &parameters));
     set_boiling_time_x_degrees_display(75, get_boiling_time(75.0, &parameters));
     set_boiling_time_x_degrees_display(80, get_boiling_time(80.0, &parameters));
     set_boiling_time_x_degrees_display(85, get_boiling_time(85.0, &parameters));
+    set_end_temperature_boiling_time_display(end_temperature_boiling_time);
 }
 
 #[wasm_bindgen]
@@ -306,6 +328,19 @@ pub fn init() {
         }),
     );
 
+    let end_temperature = query_selector("#end-temperature-input").get_value();
+    (*end_temperature_mutex.lock().unwrap()) = end_temperature;
+    set_end_temperature_display(end_temperature);
+    query_selector("#end-temperature-input").add_event_listener(
+        "input",
+        Closure::<dyn Fn(_)>::new(|event: Event| {
+            let end_temperature = event.target_element().get_value();
+            (*end_temperature_mutex.lock().unwrap()) = end_temperature;
+            set_end_temperature_display(end_temperature);
+            update_outputs();
+        }),
+    );
+
     query_selector("#start-button").add_event_listener(
         "click",
         Closure::<dyn Fn(_)>::new(|event: Event| {
@@ -316,17 +351,19 @@ pub fn init() {
                 if (*boiling_start).is_none() {
                     *boiling_start = Some(Utc::now());
                     let button = event.target_element();
-                    button.set_inner_html("Stopp");
+                    button.set_inner_html("Stopp koking");
                     button.remove_class("btn-success");
                     button.add_class("btn-danger");
-                    yolk_temperature_display_wrapper.remove_class("d-none");
+                    yolk_temperature_display_wrapper.remove_class("invisible");
+                    yolk_temperature_display_wrapper.add_class("visible");
                 } else {
                     *boiling_start = None;
                     let button = event.target_element();
-                    button.set_inner_html("Start");
+                    button.set_inner_html("Start koking");
                     button.remove_class("btn-danger");
                     button.add_class("btn-success");
-                    yolk_temperature_display_wrapper.add_class("d-none");
+                    yolk_temperature_display_wrapper.remove_class("visible");
+                    yolk_temperature_display_wrapper.add_class("invisible");
                 }
             }
             update_outputs();
