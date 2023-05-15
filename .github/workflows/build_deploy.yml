@@ -14,14 +14,8 @@ jobs:
       matrix:
         node-version: [19.x]
 
-
     steps:
     - uses: actions/checkout@v3
-
-    # - name: Build
-    #   run: |
-    #     docker build -f .github/workflows/Dockerfile -t seba2-build .
-    #     docker run --volume $PWD:/code:rw seba2-build
 
     - name: Setup Node.js
       uses: actions/setup-node@v3
@@ -36,10 +30,15 @@ jobs:
       run: |
         wasm-pack build --release
     
-    - name: Build website
+    - name: Install NPM packages
       run: |
         cd www
           npm install
+        cd ..
+
+    - name: Build website
+      run: |
+        cd www
           npm run build
         cd ..
 
