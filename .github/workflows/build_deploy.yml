@@ -10,9 +10,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # strategy:
-    #   matrix:
-    #     node-version: [19.x]
+    strategy:
+      matrix:
+        node-version: [19.x]
 
 
     steps:
@@ -23,14 +23,14 @@ jobs:
     #     docker build -f .github/workflows/Dockerfile -t seba2-build .
     #     docker run --volume $PWD:/code:rw seba2-build
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
     - name: Install wasm-pack
       run: |
         curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-
-    # - name: Setup Node.js
-    #   uses: actions/setup-node@v3
-    #   with:
-    #     node-version: ${{ matrix.node-version }}
 
     - name: Compile Rust
       run: |
