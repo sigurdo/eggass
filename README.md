@@ -1,6 +1,6 @@
 # seba2 - Scientific Egg Boiling Assistant 2
 
-[Go to app](https://seba2.duckdns.org/)
+[Go to app](https://eggass.duckdns.org/)
 
 seba2 is a web app that helps you boil your eggs with scientific precision, based on [the research by Charles D. H. Williams](https://newton.ex.ac.uk/teaching/CDHW/egg/) at the University of Exeter.
 

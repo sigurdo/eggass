@@ -1,8 +1,8 @@
 
 {
-    "name": "seba2",
-    "short_name": "seba2",
-    "description": "Scientific Egg Boiling Assistant 2",
+    "name": "Eggass",
+    "short_name": "Eggass",
+    "description": "Din vitenskapelige eggkokeassistent",
     "start_url": "/",
     "display": "standalone",
     "scope": "/",
@@ -14,7 +14,7 @@
         "type": "image/png",
         "sizes": "256x256"
     }],
-    "dir": "/seba2/www/dist",
+    "dir": "/",
     "lang": "nb-no"
 }
   
