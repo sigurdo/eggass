@@ -29,12 +29,11 @@ jobs:
   #       node-version: ${{ matrix.node-version }}
 
     - name: Build
-      using: docker
-      image: Dockerfile
-      # run: |
-      #   cd www
-      #   npm install
-      #   npx webpack
+      # using: docker
+      # image: Dockerfile
+      run: |
+        docker build -t seba2-build .
+        docker run -it --volume ./:/code:rw seba2-build
 
     # - name: Test
     #   run: |
