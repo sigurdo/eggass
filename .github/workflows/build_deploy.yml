@@ -33,7 +33,10 @@ jobs:
   #       cd www
   #       npm install
   #       npx webpack
-    
+    - name: Test
+      run: |
+        pwd
+        ls
     
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v1.0.8
