@@ -1,5 +1,5 @@
 [package]
-name = "seba2"
+name = "eggass-rust"
 version = "0.1.0"
 authors = ["Sigurd Tullander <legotull.99@gmail.com>"]
 edition = "2018"

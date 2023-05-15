@@ -1,10 +1,13 @@
-name: Build and deploy seba2
+name: Build and deploy Eggass
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+
+env:
+  PRODUCTION: 1
 
 jobs:
   build:
@@ -45,7 +48,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v1.0.8
       with:
-        name: "seba2"
+        name: "eggass"
         path: "www/dist/"
         retention-days: "1000"
   
@@ -63,4 +66,4 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v2
         with:
-          artifact_name: "seba2"
+          artifact_name: "eggass"
