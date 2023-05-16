@@ -30,144 +30,136 @@
     <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
     <script src="/index_loader.js"></script>
 
-    <div id="main-container" class="w-100 p-3">
-      <div class="table-responsive">
-        <table class="table">
-          <tbody>
-            <tr>
-              <td class="text-nowrap"><label for="mass-input" class="form-label">Masse: <span id="mass-display"></span></label></td>
-              <td><input id="mass-input" type="range" min="30" max="80" value="55" class="form-range"></td>
-            </tr>
-            <tr>
-              <td class="text-nowrap"><label for="start-temperature-input" class="form-label">Starttemperatur: <span id="start-temperature-display"></span></label></td>
-              <td><input id="start-temperature-input" type="range" min="0" max="30" value="4" class="form-range"></td>
-            </tr>
-            <tr>
-              <td colspan="2" class="p-0">
-                <div class="accordion" id="accordion-advanced-parameters">
-                  <div class="accordion-item border-0">
-                    <h2 class="accordion-header">
-                      <button class="accordion-button collapsed px-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-advanced-parameters" aria-expanded="false" aria-controls="collapse-advanced-parameters">
-                        Avansert
-                      </button>
-                    </h2>
-                    <div id="collapse-advanced-parameters" class="accordion-collapse collapse" data-bs-parent="#accordion-advanced-parameters">
-                      <div class="accordion-body p-0">
-                        <div class="table-responsive">
-                          <table class="table m-0">
-                            <tbody>
-                              <tr>
-                                <td class="text-nowrap border-0"><label for="boiling-temperature-input" class="form-label">Koketemperatur (°C)</label></td>
-                                <td class="border-0"><input id="boiling-temperature-input" type="number" value="100" class="form-control"></td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td colspan="2" class="p-0">
-                <div class="accordion" id="accordion-boiling-time-table">
-                  <div class="accordion-item border-0">
-                    <h2 class="accordion-header">
-                      <button class="accordion-button collapsed px-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-boiling-time-table" aria-expanded="false" aria-controls="collapse-boiling-time-table">
-                        Kokettidtabell
-                      </button>
-                    </h2>
-                    <div id="collapse-boiling-time-table" class="accordion-collapse collapse" data-bs-parent="#accordion-boiling-time-table">
-                      <div class="accordion-body p-0">
-                        <div class="table-responsive">
-                          <table class="table m-0">
-                            <tbody>
-                              <tr class="d-flex">
-                                <th class="col-6">Sluttemperatur</th>
-                                <th class="col-6">Koketid</th>
-                              </tr>
-                              <tr class="d-flex">
-                                <td class="col-6">70°C</td>
-                                <td id="boiling-time-70-degrees-display" class="col-6"></td>
-                              </tr>
-                              <tr class="d-flex">
-                                <td class="col-6">75°C</td>
-                                <td id="boiling-time-75-degrees-display" class="col-6"></td>
-                              </tr>
-                              <tr class="d-flex">
-                                <td class="col-6">80°C</td>
-                                <td id="boiling-time-80-degrees-display" class="col-6"></td>
-                              </tr>
-                              <tr class="d-flex">
-                                <td class="col-6 border-0">85°C</td>
-                                <td id="boiling-time-85-degrees-display" class="col-6 border-0"></td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td colspan="2" class="p-0 border-0">
-                <div class="accordion" id="accordion-notifications">
-                  <div class="accordion-item border-0">
-                    <h2 class="accordion-header">
-                      <button class="accordion-button collapsed px-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-notifications" aria-expanded="false" aria-controls="collapse-notifications">
-                        Sluttemperatur
-                      </button>
-                    </h2>
-                    <div id="collapse-notifications" class="accordion-collapse collapse" data-bs-parent="#accordion-notifications">
-                      <div class="accordion-body p-0">
-                        <div class="table-responsive">
-                          <table class="table m-0">
-                            <tbody>
-                              <tr>
-                                <th>Temperatur (°C)</th>
-                                <th>Koketid</th>
-                                <!-- <th>Varsling</th> -->
-                              </tr>
-                              <tr>
-                                <td class="text-nowrap border-0"><input id="end-temperature-input" type="number" value="75" class="form-control"></td>
-                                <td class="border-0"><span id="end-temperature-boiling-time-display"></span></td>
-                                <!-- <td class="border-0"><input type="checkbox" class="form-check"></td> -->
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <div id="main-container" class="w-100 px-0">
+      <div class="border-bottom px-3 py-2">
+        <div>
+          <label for="mass-input" class="form-label w-100"><b>Masse</b><span id="mass-display" class="mx-3"></span></label>
+        </div>
+        <input id="mass-input" type="range" min="30" max="80" value="55" class="form-range">
       </div>
-
-      <button id="start-button" class="btn btn-success w-100">Start koking</button>
-
-      <div id="yolk-temperature-display-wrapper" class="table-responsive invisible my-3">
-        <table class="table">
-          <tbody>
-            <tr class="d-flex">
-              <td class="col-6 align-middle">Tid siden start</td>
-              <td class="col-6"><span id="time-since-start-display" class="fs-5"></span></td>
-            </tr>
-            <tr class="d-flex">
-              <td class="col-6">Plommetemperatur nå</td>
-              <td class="col-6"><span id="yolk-temperature-display" class="fs-1"></span></td>
-            </tr>
-            <tr class="d-flex">
-              <td class="col-6 align-middle border-0">Tid til <span id="end-temperature-display-2"></span></td>
-              <td class="col-6 border-0"><span id="time-till-end-temperature-display" class="fs-5"></span></td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="border-bottom px-3 py-2">
+        <div>
+          <label for="start-temperature-input" class="form-label"><b>Starttemperatur</b><span id="start-temperature-display" class="mx-3"></span>
+        </div>
+        <input id="start-temperature-input" type="range" min="0" max="30" value="4" class="form-range">
+      </div>
+      <div class="border-bottom">
+        <div class="accordion" id="accordion-advanced-parameters">
+          <div class="accordion-item border-0">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed px-3 py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-advanced-parameters" aria-expanded="false" aria-controls="collapse-advanced-parameters">
+                Avansert
+              </button>
+            </h2>
+            <div id="collapse-advanced-parameters" class="accordion-collapse collapse" data-bs-parent="#accordion-advanced-parameters">
+              <div class="accordion-body px-3 py-2">
+                <div class="row">
+                  <div class="col d-flex align-items-center">
+                    <label for="boiling-temperature-input" class="form-label m-0">Koketemperatur (°C)</label>
+                  </div>
+                  <div class="col">
+                    <input id="boiling-temperature-input" type="number" value="100" class="form-control" size="4">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="border-bottom">
+        <div class="accordion" id="accordion-boiling-time-table">
+          <div class="accordion-item border-0">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed px-3 py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-boiling-time-table" aria-expanded="false" aria-controls="collapse-boiling-time-table">
+                Kokettidtabell
+              </button>
+            </h2>
+            <div id="collapse-boiling-time-table" class="accordion-collapse collapse" data-bs-parent="#accordion-boiling-time-table">
+              <div class="accordion-body px-3 py-2">
+                <div class="table-responsive">
+                  <table class="table m-0">
+                    <tbody>
+                      <tr class="d-flex">
+                        <th class="col-6">Sluttemperatur</th>
+                        <th class="col-6">Koketid</th>
+                      </tr>
+                      <tr class="d-flex">
+                        <td class="col-6">70°C</td>
+                        <td id="boiling-time-70-degrees-display" class="col-6"></td>
+                      </tr>
+                      <tr class="d-flex">
+                        <td class="col-6">75°C</td>
+                        <td id="boiling-time-75-degrees-display" class="col-6"></td>
+                      </tr>
+                      <tr class="d-flex">
+                        <td class="col-6">80°C</td>
+                        <td id="boiling-time-80-degrees-display" class="col-6"></td>
+                      </tr>
+                      <tr class="d-flex">
+                        <td class="col-6 border-0">85°C</td>
+                        <td id="boiling-time-85-degrees-display" class="col-6 border-0"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="">
+        <div class="accordion" id="accordion-notifications">
+          <div class="accordion-item border-0">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed px-3 py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-notifications" aria-expanded="false" aria-controls="collapse-notifications">
+                Sluttemperatur
+              </button>
+            </h2>
+            <div id="collapse-notifications" class="accordion-collapse collapse" data-bs-parent="#accordion-notifications">
+              <div class="accordion-body px-3 py-2">
+                <div class="table-responsive">
+                  <table class="table m-0">
+                    <tbody>
+                      <tr>
+                        <th>Temperatur (°C)</th>
+                        <th>Koketid</th>
+                        <!-- <th>Varsling</th> -->
+                      </tr>
+                      <tr>
+                        <td class="text-nowrap border-0"><input id="end-temperature-input" type="number" value="75" size="4" class="form-control"></td>
+                        <td class="border-0"><span id="end-temperature-boiling-time-display"></span></td>
+                        <!-- <td class="border-0"><input type="checkbox" class="form-check"></td> -->
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="px-3 py-2">
+        <button id="start-button" class="btn btn-success w-100">Start koking</button>
+      </div>
+      <div id="yolk-temperature-display-wrapper" class="invisible">
+        <div class="border-bottom px-3 py-2">
+          <div class="row align-items-center">
+            <div class="col-6">Tid siden start</div>
+            <div class="col-6"><span id="time-since-start-display" class="fs-5"></span></div>
+          </div>
+        </div>
+        <div class="border-bottom px-3 py-2">
+          <div class="row align-items-center">
+            <div class="col-6">Plommetemperatur nå</div>
+            <div class="col-6"><span id="yolk-temperature-display" class="fs-1"></span></div>
+          </div>
+        </div>
+        <div class="px-3 py-2">
+          <div class="row align-items-center">
+            <div class="col-6">Tid til <span id="end-temperature-display-2"></span></div>
+            <div class="col-6"><span id="time-till-end-temperature-display" class="fs-5"></span></div>
+          </div>
+        </div>
       </div>
     </div>
   </body>
