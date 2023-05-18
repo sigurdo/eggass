@@ -1,6 +1,6 @@
 # Eggass - Scientific egg boiling assistant
 
-[Go to app](https://eggass.duckdns.org/)
+[Go to app](https://eggass.sigurdt.no/)
 
 Eggass is a web app that helps you boil your eggs with scientific precision, based on [the research by Charles D. H. Williams](https://newton.ex.ac.uk/teaching/CDHW/egg/) at the University of Exeter.
 
