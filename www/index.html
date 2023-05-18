@@ -43,6 +43,12 @@
         </div>
         <input id="start-temperature-input" type="range" min="0" max="30" value="4" class="form-range">
       </div>
+      <div class="border-bottom px-3 py-2">
+        <div>
+          <label for="end-temperature-input" class="form-label"><b>Slutttemperatur</b><span id="end-temperature-display" class="mx-3"></span>
+        </div>
+        <input id="end-temperature-input" type="range" min="60" max="90" value="75" class="form-range">
+      </div>
       <div class="border-bottom">
         <div class="accordion" id="accordion-advanced-parameters">
           <div class="accordion-item border-0">
@@ -66,7 +72,7 @@
           </div>
         </div>
       </div>
-      <div class="border-bottom">
+      <div class="">
         <div class="accordion" id="accordion-boiling-time-table">
           <div class="accordion-item border-0">
             <h2 class="accordion-header">
@@ -84,6 +90,10 @@
                         <th class="col-6">Koketid</th>
                       </tr>
                       <tr class="d-flex">
+                        <td id="end-temperature-display-3" class="col-6"></td>
+                        <td id="end-temperature-boiling-time-display" class="col-6"></td>
+                      </tr>
+                      <tr class="d-flex">
                         <td class="col-6">70°C</td>
                         <td id="boiling-time-70-degrees-display" class="col-6"></td>
                       </tr>
@@ -98,37 +108,6 @@
                       <tr class="d-flex">
                         <td class="col-6 border-0">85°C</td>
                         <td id="boiling-time-85-degrees-display" class="col-6 border-0"></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="">
-        <div class="accordion" id="accordion-notifications">
-          <div class="accordion-item border-0">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed px-3 py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-notifications" aria-expanded="false" aria-controls="collapse-notifications">
-                Sluttemperatur
-              </button>
-            </h2>
-            <div id="collapse-notifications" class="accordion-collapse collapse" data-bs-parent="#accordion-notifications">
-              <div class="accordion-body px-3 py-2">
-                <div class="table-responsive">
-                  <table class="table m-0">
-                    <tbody>
-                      <tr>
-                        <th>Temperatur (°C)</th>
-                        <th>Koketid</th>
-                        <!-- <th>Varsling</th> -->
-                      </tr>
-                      <tr>
-                        <td class="text-nowrap border-0"><input id="end-temperature-input" type="number" value="75" size="4" class="form-control"></td>
-                        <td class="border-0"><span id="end-temperature-boiling-time-display"></span></td>
-                        <!-- <td class="border-0"><input type="checkbox" class="form-check"></td> -->
                       </tr>
                     </tbody>
                   </table>

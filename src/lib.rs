@@ -232,9 +232,11 @@ pub fn set_start_temperature_display(temperature: f64) {
 }
 
 pub fn set_end_temperature_display(temperature: f64) {
-    // query_selector("#end-temperature-display")
-    //     .set_inner_html(format!("{:.1} °C", temperature).as_str());
+    query_selector("#end-temperature-display")
+        .set_inner_html(format!("{:.1} °C", temperature).as_str());
     query_selector("#end-temperature-display-2")
+        .set_inner_html(format!("{:.1} °C", temperature).as_str());
+    query_selector("#end-temperature-display-3")
         .set_inner_html(format!("{:.1} °C", temperature).as_str());
 }
 
