@@ -4,6 +4,8 @@ use std::f64::consts::PI;
 use std::f64::INFINITY;
 use std::fmt::Debug;
 use std::sync::Mutex;
+use std::sync::mpsc;
+use std::thread;
 
 use chrono::prelude::*;
 use chrono::{DateTime, Utc};
@@ -17,6 +19,7 @@ use wasm_bindgen::prelude::*;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 use utils::set_panic_hook;
+use web_sys::Storage;
 use web_sys::{Document, Element, Event, HtmlInputElement, Window};
 
 extern crate web_sys;
@@ -147,6 +150,32 @@ pub fn query_selector(selector: &str) -> Element {
 
 pub fn get_window() -> Window {
     web_sys::window().expect("No window")
+}
+
+pub fn get_local_storage() -> Storage {
+    get_window().local_storage().expect("Getting local storage failed").expect("No local storage")
+}
+
+pub fn get_local_storage_item(key: &str) -> Option<String> {
+    get_local_storage().get_item(key).expect("Getting local storage item failed")
+}
+
+pub fn set_local_storage_item(key: &str, value: &str) {
+    get_local_storage().set_item(key, value).expect("Setting local storage item failed")
+}
+
+pub fn get_local_storage_item_f64(key: &str) -> Option<f64> {
+    let item = get_local_storage_item(key);
+    if let Some(value) = item {
+        Some(value.parse().expect("Parsing local storage item as f64 failed"))
+    }
+    else {
+        None
+    }
+}
+
+pub fn set_local_storage_item_f64(key: &str, value: f64) {
+    set_local_storage_item(key, &value.to_string())
 }
 
 trait ElementTraitCustom {
@@ -287,7 +316,6 @@ pub fn update_outputs() {
 #[wasm_bindgen]
 pub fn init() {
     set_panic_hook();
-
     let mass = query_selector("#mass-input").get_value();
     (*boiling_session_parameters_mutex.lock().unwrap()).egg = EggParameters::from_mass(mass);
     set_mass_display(mass);
@@ -378,4 +406,31 @@ pub fn init() {
     setInterval(&boiling_interval_closure, 100);
 
     boiling_interval_closure.forget();
+}
+
+#[wasm_bindgen]
+pub fn test() {
+    let (tx, rx) = mpsc::channel();
+
+    // query_selector("#mass-input").add_event_listener(
+    //     "input",
+    //     Closure::<dyn Fn(_)>::new(move |event: Event| {
+    //         log!("1");
+    //         let mass = event.target_element().get_value();
+    //         log!("2");
+    //         tx.send(mass).unwrap();
+    //         log!("3");
+    //         set_mass_display(mass);
+    //         log!("4");
+    //     }),
+    // );
+
+    thread::spawn(move || {
+        let val = String::from("hi");
+        tx.send(val).unwrap();
+    });
+
+    log!("Heisann");
+    let received = rx.recv().unwrap();
+    log!("Got: {received}");
 }

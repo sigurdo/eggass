@@ -28,7 +28,7 @@ js-sys = "0.3.61"
 
 [dependencies.web-sys]
 version = "0.3.61"
-features = [ "console", "Window", "HtmlDocument", "HtmlBodyElement", "HtmlInputElement", "HtmlTextAreaElement", "DateTimeValue", "Performance" ]
+features = [ "console", "Window", "HtmlDocument", "HtmlBodyElement", "HtmlInputElement", "HtmlTextAreaElement", "DateTimeValue", "Performance", "Storage" ]
 
 [dependencies.chrono]
 version = "0.4.24"

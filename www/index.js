@@ -1,3 +1,3 @@
-import { init } from "eggass-rust";
+import { test } from "eggass-rust";
 
-init();
+test();
