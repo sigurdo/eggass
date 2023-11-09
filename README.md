@@ -18,6 +18,7 @@ Build web app with
 
 ```
 cd www
+npm install
 npm run build
 cd ..
 ```

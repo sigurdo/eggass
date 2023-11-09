@@ -8,6 +8,8 @@ use std::sync::Mutex;
 use chrono::prelude::*;
 use chrono::{DateTime, Utc};
 
+use serde::de::DeserializeOwned;
+use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -17,7 +19,7 @@ use wasm_bindgen::prelude::*;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 use utils::set_panic_hook;
-use web_sys::{Document, Element, Event, HtmlInputElement, Window};
+use web_sys::{Document, Element, Event, HtmlInputElement, Storage, Window};
 
 extern crate web_sys;
 
@@ -152,6 +154,7 @@ pub fn get_window() -> Window {
 trait ElementTraitCustom {
     fn add_event_listener(&self, type_: &str, callback: Closure<dyn Fn(Event)>);
     fn get_value(&self) -> f64;
+    fn set_value(&self, value: f64);
     fn add_class(&self, class: &str);
     fn remove_class(&self, class: &str);
 }
@@ -168,6 +171,13 @@ impl ElementTraitCustom for Element {
             .dyn_into::<HtmlInputElement>()
             .expect("Couldn't cast Element to HtmlInputElement")
             .value_as_number()
+    }
+
+    fn set_value(&self, value: f64) {
+        self.to_owned()
+            .dyn_into::<HtmlInputElement>()
+            .expect("Couldn't cast Element to HtmlInputElement")
+            .set_value_as_number(value)
     }
 
     fn add_class(&self, class: &str) {
@@ -267,7 +277,8 @@ pub fn set_time_till_end_temperature_display(time: f64) {
 
 pub fn update_outputs() {
     let parameters = *boiling_session_parameters_mutex.lock().unwrap();
-    let end_temperature_boiling_time = get_boiling_time(*end_temperature_mutex.lock().unwrap(), &parameters);
+    let end_temperature_boiling_time =
+        get_boiling_time(*end_temperature_mutex.lock().unwrap(), &parameters);
     if let Some(boiling_start) = *boiling_start_mutex.lock().unwrap() {
         let time = Utc::now()
             .signed_duration_since(boiling_start)
@@ -284,9 +295,67 @@ pub fn update_outputs() {
     set_end_temperature_boiling_time_display(end_temperature_boiling_time);
 }
 
+pub fn get_local_storage() -> Storage {
+    get_window()
+        .local_storage()
+        .expect("Failed to get localStorage of window")
+        .expect("Window has no localStorage")
+}
+
+pub fn set_local_storage<T>(key: &str, value: T)
+where
+    T: Serialize + DeserializeOwned + Debug,
+{
+    let storage = get_local_storage();
+    let value = serde_json::to_string(&value)
+        .expect(format!("Failed to deserialize value {value:?}").as_str());
+    storage
+        .set_item(key, &value)
+        .expect(format!("Failed to store value {value:?} in localStorage.{key}").as_str());
+}
+
+pub fn local_storage<T>(key: &str) -> Option<T>
+where
+    T: Serialize + DeserializeOwned,
+{
+    let storage = get_local_storage();
+    if let Ok(Some(raw)) = storage.get_item(key) {
+        if let Ok(value) = serde_json::from_str::<Option<T>>(raw.as_str()) {
+            return value;
+        }
+    }
+    None
+}
+
 #[wasm_bindgen]
 pub fn init() {
     set_panic_hook();
+
+    if let Some(mass) = local_storage("mass") {
+        query_selector("#mass-input").set_value(mass);
+    }
+    if let Some(boiling_temperature) = local_storage("boiling-temperature") {
+        query_selector("#boiling-temperature-input").set_value(boiling_temperature);
+    }
+    if let Some(start_temperature) = local_storage("start-temperature") {
+        query_selector("#start-temperature-input").set_value(start_temperature);
+    }
+    if let Some(end_temperature) = local_storage("end-temperature") {
+        query_selector("#end-temperature-input").set_value(end_temperature);
+    }
+    if let Some(boiling_start) = local_storage("boiling-start") {
+        *boiling_start_mutex.lock().unwrap() = boiling_start;
+        if boiling_start.is_some() {
+            let button = query_selector("#start-button");
+            let yolk_temperature_display_wrapper =
+                query_selector("#yolk-temperature-display-wrapper");
+            button.set_inner_html("Stopp koking");
+            button.remove_class("btn-success");
+            button.add_class("btn-danger");
+            yolk_temperature_display_wrapper.remove_class("invisible");
+            yolk_temperature_display_wrapper.add_class("visible");
+        }
+    }
 
     let mass = query_selector("#mass-input").get_value();
     (*boiling_session_parameters_mutex.lock().unwrap()).egg = EggParameters::from_mass(mass);
@@ -299,6 +368,7 @@ pub fn init() {
                 EggParameters::from_mass(mass);
             set_mass_display(mass);
             update_outputs();
+            set_local_storage("mass", mass);
         }),
     );
 
@@ -313,6 +383,7 @@ pub fn init() {
                 boiling_temperature;
             set_boiling_temperature_display(boiling_temperature);
             update_outputs();
+            set_local_storage("boiling-temperature", boiling_temperature);
         }),
     );
 
@@ -327,6 +398,7 @@ pub fn init() {
                 start_temperature;
             set_start_temperature_display(start_temperature);
             update_outputs();
+            set_local_storage("start-temperature", start_temperature);
         }),
     );
 
@@ -340,6 +412,7 @@ pub fn init() {
             (*end_temperature_mutex.lock().unwrap()) = end_temperature;
             set_end_temperature_display(end_temperature);
             update_outputs();
+            set_local_storage("end-temperature", end_temperature);
         }),
     );
 
@@ -367,6 +440,7 @@ pub fn init() {
                     yolk_temperature_display_wrapper.remove_class("visible");
                     yolk_temperature_display_wrapper.add_class("invisible");
                 }
+                set_local_storage("boiling-start", *boiling_start);
             }
             update_outputs();
         }),
